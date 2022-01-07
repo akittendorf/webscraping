@@ -1,13 +1,18 @@
 # OBJECTIVE: gather book titles, ratings, prices for books in stock at http://books.toscrape.com/ and save as csv
+
+# module imports
 import requests
 from bs4 import BeautifulSoup as bs
+import csv
 
+
+# function definitions
 def getHTML(url): # takes a string url, returns HTML contents as text
     response = requests.get(url)
     html = response.text
     return html
 
-def get_books(html): # takes html string, returns a list of lists
+def get_books(): # takes html string, returns a list of lists
     books = []
     for i in range(1, 51):
         try:
@@ -20,7 +25,7 @@ def get_books(html): # takes html string, returns a list of lists
                 # set condition that title is in stock
                     if title.find('p', {'class': 'instock availability'}).text.strip() == 'In stock':
                         # get title, star-rating, and price
-                        print(f"{title.h3.a['title']}, {title.p['class'][1]}, {title.find('div', {'class':'product_price'}).p.text[1:]}") 
+                        #print(f"{title.h3.a['title']}, {title.p['class'][1]}, {title.find('div', {'class':'product_price'}).p.text[1:]}") 
                         books.append([title.h3.a['title'], title.p['class'][1], title.find('div', {'class':'product_price'}).p.text[1:]])
                 except:
                     pass
@@ -29,3 +34,11 @@ def get_books(html): # takes html string, returns a list of lists
     return books
 
 def make_csv(books): # takes a list and writes to csv
+    with open('books.csv', 'w', encoding="utf-8") as outfile:
+        writer = csv.writer(outfile)
+        writer.writerow(['Title', 'Star-Rating', 'Price'])
+        writer.writerows(books)
+  
+# execution       
+books = get_books()
+make_csv(books)
